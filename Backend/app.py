@@ -1,34 +1,29 @@
 from flask import Flask, request, jsonify
-from openai import ChatCompletion  # Import the appropriate class
-from dotenv import load_dotenv
+import google.generativeai as genai
 import os
 
 app = Flask(__name__)
 
-# Load environment variables from .env file
-load_dotenv()
+# Configure Google API
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-@app.route('/chat', methods=['POST'])
+# Initialize Gemini model
+model = genai.GenerativeModel("gemini-pro")
+
+@app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json
-    user_message = data.get("message")
-    response_message = generate_response(user_message)
-    return jsonify({"response": response_message})
+    user_message = data.get('message')
 
-def generate_response(message):
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
+
     try:
-        chat_completion = ChatCompletion.create(  # Use the appropriate method
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "user",
-                    "content": message,
-                }
-            ],
-        )
-        return chat_completion.choices[0].message['content'].strip()
+        response = model.start_chat(history=[]).send_message(user_message, stream=True)
+        response_text = "".join(chunk.text for chunk in response)
+        return jsonify({"response": response_text.strip()})
     except Exception as e:
-        return str(e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(debug=True)
