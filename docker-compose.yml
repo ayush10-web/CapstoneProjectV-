@@ -13,7 +13,7 @@ services:
     image: rujalmhn/aifront:1.0
     container_name: aifront-container
     ports:
-      - "8501:8501"
+      - "80:8501"
     networks:
       - mynetwork
     depends_on:
