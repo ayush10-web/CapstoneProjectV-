@@ -1,11 +1,18 @@
-from flask import Flask, request, jsonify
-import google.generativeai as genai
+from flask import Flask, request, jsonify # type: ignore
+import google.generativeai as genai # type: ignore
 import os
 
 app = Flask(__name__)
 
-# Configure Google API
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+# Assuming your environment variable is named GOOGLE_API_KEY
+api_key = os.getenv("GOOGLE_API_KEY")
+
+if api_key:
+  genai.configure(api_key=api_key)
+else:
+  # Handle the case where the environment variable is not set (optional)
+  # You can raise an error, log a warning, or provide a default behavior
+  raise ValueError("GOOGLE_API_KEY environment variable not set")
 
 # Initialize Gemini model
 model = genai.GenerativeModel("gemini-pro")
@@ -26,4 +33,4 @@ def chat():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
