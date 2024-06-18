@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 def get_response(message):
-    url = 'http://host.docker.internal:5000/api/chat'  # Your backend URL
+    url = 'http://localhost:5000/api/chat'  # Your backend URL
     data = {'message': message}
     try:
         response = requests.post(url, json=data)
